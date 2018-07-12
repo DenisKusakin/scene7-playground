@@ -23,10 +23,7 @@ const App = observer(class App extends Component {
                     <Scene7Editor scene7Request={this.state.scene7Request}/>
                 </div>
                 <div className="column">
-                    <div style={{display: 'flex', flexDirection: 'column-reverse'}}>
-                        <img
-                            src={`http://s7d2.scene7.com/is/image/ToryBurchNA/andrei_template?${this.state.scene7Request.urlPartial}`}
-                            alt='scene7'/>
+                    <div style={{paddingBottom: '50px'}}>
                         <TextField value={this.state.scene7Request.urlPartial}
                                    onChange={e => {
                                        let scene7Request = urlToScene7Request(e.target.value);
@@ -38,6 +35,10 @@ const App = observer(class App extends Component {
                                    fullWidth
                                    multiline/>
                     </div>
+                    <img
+                        style={{border: '1px solid #021a40'}}
+                        src={`http://s7d2.scene7.com/is/image/ToryBurchNA/andrei_template?${this.state.scene7Request.urlPartial}`}
+                        alt='scene7'/>
 
                     {/*<TextField value={this.state.scene7Request.urlPartial}*/}
                     {/*fullWidth*/}

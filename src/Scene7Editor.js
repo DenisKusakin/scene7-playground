@@ -37,6 +37,7 @@ const CommandEditor = observer(class CommandEditor extends Component {
                             this.props.command.value = e.target.value
                         }}
                         margin="normal"
+                        multiline
                         fullWidth
                     />
                 </div>
@@ -98,7 +99,7 @@ const Scene7Editor = observer(class Scene7Editor extends Component {
                     if (command instanceof Layer) {
                         return <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography >Expansion Panel 1</Typography>
+                                <Typography >Layer: {command.order}</Typography>
                             </ExpansionPanelSummary>
                             <LayerEditor layer={command}
                                          onRemoveClick={() => this.props.scene7Request.removeCommand(i)}/>
