@@ -44,6 +44,8 @@ class Layer {
 
 class Scene7Request {
     commands = [];
+    host = null;
+    template = null;
 
     constructor() {
         this.commands = []
@@ -65,19 +67,24 @@ class Scene7Request {
     }
 
     get urlPartial() {
-        return this.commands.map(command => command.urlPartial).join("&")
+        return `${this.host}/is/image/${this.template}?${this.commands.map(command => command.urlPartial).join("&")}`
     }
 }
 
 function urlToScene7Request(scene7Url) {
-    const parametersPairs = scene7Url.split("&");
+    //TODO: This primitive implementation should be reworked
+    const [hostWithTemplate, rest] = scene7Url.split("?");
+    const [host, template] = hostWithTemplate.split("/is/image/");
+    const parametersPairs = rest.split("&");
     const request = new Scene7Request();
+    request.host = host;
+    request.template = template;
     let addCommandFunc = command => {
         request.addCommand(command)
     };
     parametersPairs.forEach(parameterPair => {
         const [name, value] = parameterPair.split("=");
-        console.log(name, value);
+        //console.log(name, value);
         if (name === 'layer') {
             let newLayer = new Layer(value);
             request.addCommand(newLayer);
@@ -106,6 +113,8 @@ decorate(Layer, {
 
 decorate(Scene7Request, {
     commands: observable,
+    host: observable,
+    template: observable,
     addCommand: action,
     urlPartial: computed,
     removeCommand: action,
