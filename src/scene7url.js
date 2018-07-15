@@ -1,7 +1,7 @@
 import {decorate, observable, computed, action} from "mobx"
+import scene7Commands from "./scene7-commands"
 
 class Command {
-
     constructor(name, value) {
         this.name = name;
         this.value = value
@@ -9,6 +9,10 @@ class Command {
 
     get urlPartial() {
         return `${this.name}=${this.value}`
+    }
+
+    get isCommandKnown() {
+        return !!Object.keys(scene7Commands).find(x => x.toLowerCase() === this.name.toLowerCase())
     }
 }
 
@@ -75,7 +79,7 @@ function urlToScene7Request(scene7Url) {
     //TODO: This primitive implementation should be reworked
     const [hostWithTemplate, rest] = scene7Url.split("?");
     const [host, template] = hostWithTemplate.split("/is/image/");
-    const parametersPairs = rest.split("&");
+    const parametersPairs = rest ? rest.split("&") : [];
     const request = new Scene7Request();
     request.host = host;
     request.template = template;
@@ -100,6 +104,7 @@ decorate(Command, {
     name: observable,
     value: observable,
     urlPartial: computed,
+    isCommandKnown: computed
 });
 
 decorate(Layer, {

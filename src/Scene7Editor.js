@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import TextField from '@material-ui/core/TextField';
-import Switch from '@material-ui/core/Switch';
 import {Command, Layer, Scene7Request} from "./scene7url";
 import {observer} from "mobx-react";
 import Button from '@material-ui/core/Button';
@@ -12,39 +11,146 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Autosuggest from './autosuggest';
+import scene7Commands from './scene7-commands';
+import ColorPicker from './colorPicker';
+import InputAdornment from '@material-ui/core/InputAdornment';
+
+const getCommandInfo = commandName => {
+    return scene7Commands[commandName];
+};
+
+const isValidColor = colorString => {
+    const [r, g, b] = colorString.split(",");
+    return !isNaN(parseInt(r)) && !isNaN(parseInt(g)) && !isNaN(parseInt(b))
+};
+
+const colorStringToRGB = color => {
+    const [r, g, b] = color.split(",");
+    return {
+        r: parseInt(r),
+        g: parseInt(g),
+        b: parseInt(b)
+    }
+};
+
+const PositionEditor = ({x, y, onChange}) => <div style={{display: 'flex', flexDirection: 'column'}}>
+    <TextField
+        value={parseInt(x)}
+        onChange={e => {
+            onChange({x: e.target.value, y})
+        }}
+        type="number"
+        margin="normal"
+        fullWidth
+        InputLabelProps={{
+            shrink: true,
+        }}
+        InputProps={{
+            startAdornment: <InputAdornment position="start">X: </InputAdornment>
+        }}
+    />
+    <TextField
+        value={parseInt(y)}
+        onChange={e => {
+            onChange({x, y: e.target.value})
+        }}
+        margin="normal"
+        type="number"
+        InputLabelProps={{
+            shrink: true,
+        }}
+        InputProps={{
+            startAdornment: <InputAdornment position="start">Y: </InputAdornment>
+        }}
+        fullWidth
+    />
+</div>;
+
+const CommandValueEditor = observer(({command}) => {
+    const commandInfo = getCommandInfo(command.name);
+
+    if (!commandInfo || !commandInfo.type || commandInfo.type === "string") {
+        return <TextField
+            error={command.name.length === 0}
+            label={command.name.length === 0 ? "Invalid Command Name" : command.name}
+            value={command.value}
+            onChange={e => {
+                command.value = e.target.value
+            }}
+            margin="normal"
+            multiline
+            fullWidth
+        />
+    }
+    if (commandInfo.type === "color") {
+        if (isValidColor(command.value)) {
+            return <ColorPicker
+                color={colorStringToRGB(command.value)}
+                onChange={color => {
+                    const rgbColor = color.rgb;
+                    command.value = `${rgbColor.r},${rgbColor.g},${rgbColor.b}`
+                }}
+            />
+        } else {
+            return <TextField
+                error='Incorrect Color'
+                label={command.name}
+                value={command.value}
+                onChange={e => {
+                    command.value = e.target.value
+                }}
+                margin="normal"
+                multiline
+                fullWidth
+            />
+        }
+    }
+    if (commandInfo.type === "position") {
+        const [x, y] = command.value.split(",");
+        return <PositionEditor
+            x={x}
+            y={y}
+            onChange={({x, y}) => command.value = `${x},${y}`}
+        />
+    }
+    if (commandInfo.type === "number") {
+        return <TextField
+            label={command.name}
+            value={parseInt(command.value)}
+            onChange={e => {
+                command.value = e.target.value
+            }}
+            type="number"
+            margin="normal"
+            fullWidth
+        />
+    }
+});
 
 const CommandEditor = observer(class CommandEditor extends Component {
     render() {
         return <div>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <div>
-                    <TextField
-                        label={"Command Name"}
-                        value={this.props.command.name}
-                        onChange={e => {
-                            this.props.command.name = e.target.value
-                        }}
-                        margin="normal"
-                        fullWidth
-                    />
-                </div>
-                <div style={{paddingLeft: '15px'}}>
-                    <TextField
-                        error={this.props.command.name.length === 0}
-                        label={this.props.command.name.length === 0 ? "Invalid Command Name" : this.props.command.name}
-                        value={this.props.command.value}
-                        onChange={e => {
-                            this.props.command.value = e.target.value
-                        }}
-                        margin="normal"
-                        multiline
-                        fullWidth
-                    />
-                </div>
+            <div style={{display: 'flex', alignItems: 'center'}}>
                 <div>
                     <IconButton onClick={this.props.onRemoveClick}>
                         <DeleteIcon/>
                     </IconButton>
+                </div>
+                <div>
+                    <Autosuggest
+                        value={this.props.command.name || ''}
+                        label={this.props.command.isCommandKnown ? 'Command Name' : 'Unknown Command'}
+                        fullWidth
+                        margin="normal"
+                        error={!this.props.command.isCommandKnown}
+                        onChange={newValue => {
+                            this.props.command.name = newValue
+                        }}
+                    />
+                </div>
+                <div style={{paddingLeft: '15px'}}>
+                    <CommandValueEditor command={this.props.command}/>
                 </div>
             </div>
         </div>
@@ -61,10 +167,6 @@ const LayerEditor = observer(class LayerEditor extends Component {
             <IconButton color="secondary" onClick={onRemoveClick}>
                 <DeleteIcon/>
             </IconButton>
-            {/*<Button variant="outlined" color="secondary" onClick={onRemoveClick}>*/}
-            {/*Remove Layer*/}
-            {/*<DeleteIcon/>*/}
-            {/*</Button>*/}
             <Button variant="outlined" color="secondary" onClick={() => {
                 layer.hide = !layer.hide;
             }}>
@@ -80,11 +182,6 @@ const LayerEditor = observer(class LayerEditor extends Component {
                 }}>
                     <AddIcon/>
                 </IconButton>
-                {/*<Button variant="outlined" color="primary" onClick={() => {*/}
-                {/*layer.addCommand(new Command("", ""))*/}
-                {/*}}>*/}
-                {/*Add Layer Command*/}
-                {/*</Button>*/}
             </div>
         </div>
     }

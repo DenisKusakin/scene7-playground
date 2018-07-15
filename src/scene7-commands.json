@@ -1,0 +1,29 @@
+{
+  "align": {
+  },
+  "anchor": {
+    "type": "position"
+  },
+  "bgc": {
+    "type": "color"
+  },
+  "color": {
+    "type": "color"
+  },
+  "bgColor": {
+    "type": "color"
+  },
+  "pos": {
+    "type": "position"
+  },
+  "wid": {
+    "type": "number"
+  },
+  "textPs": {
+  },
+  "size": {
+    "type": "position"
+  },
+  "extend": {
+  }
+}
