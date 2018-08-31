@@ -6,13 +6,15 @@ import TextField from '@material-ui/core/TextField';
 import ImageDiff from './react-image-diff';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Slider from '@material-ui/lab/Slider';
 
 class ImageComparator extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             compareToUrl: null,
-            currentTabIndex: 0
+            currentTabIndex: 0,
+            fadeValue: 50
         }
     }
 
@@ -20,12 +22,17 @@ class ImageComparator extends React.Component {
         this.setState({ currentTabIndex });
     };
 
+    handleFadeChange = (event, fadeValue) => {
+        this.setState({ fadeValue });
+    };
+
     render() {
         return <div>
             <Tabs value={this.state.currentTabIndex} onChange={this.handleChange}>
                 <Tab label="Image" />
                 <Tab label="Fade" />
-                <Tab label="Comparison 2" />
+                <Tab label="Difference" />
+                <Tab label="Swipe" />
             </Tabs>
             {this.state.currentTabIndex === 0 && <img
                 style={{ border: '1px solid #021a40' }}
@@ -33,8 +40,39 @@ class ImageComparator extends React.Component {
                 alt='scene7' />}
             {this.state.currentTabIndex === 1 && <div>
                 <ImageDiff
-                    before={this.props.originalUrl}
-                    after={this.state.compareToUrl} type="fade" value={.5} />
+                    after={this.props.originalUrl}
+                    before={this.state.compareToUrl} type="fade" value={this.state.fadeValue/100} />
+                <Slider style={{width: '300px'}} value={this.state.fadeValue} onChange={this.handleFadeChange} />
+                <TextField value={this.state.compareToUrl}
+                    onChange={e => {
+                        this.setState({
+                            compareToUrl: e.target.value
+                        })
+                    }}
+                    label="Compare to url"
+                    fullWidth
+                    multiline />
+            </div>}
+            {this.state.currentTabIndex === 2 && <div>
+                <ImageDiff
+                    after={this.props.originalUrl}
+                    before={this.state.compareToUrl} type="difference" />
+                <TextField value={this.state.compareToUrl}
+                    onChange={e => {
+                        this.setState({
+                            compareToUrl: e.target.value
+                        })
+                    }}
+                    label="Compare to url"
+                    fullWidth
+                    multiline />
+            </div>}
+            {this.state.currentTabIndex === 3 && <div>
+                <ImageDiff
+                    value={this.state.fadeValue/100}
+                    after={this.props.originalUrl}
+                    before={this.state.compareToUrl} type="swipe"/>
+                <Slider style={{width: '300px'}} value={this.state.fadeValue} onChange={this.handleFadeChange} />
                 <TextField value={this.state.compareToUrl}
                     onChange={e => {
                         this.setState({
@@ -48,40 +86,5 @@ class ImageComparator extends React.Component {
         </div>
     }
 }
-
-// class ImageComparator extends React.Component {
-//     constructor(props) {
-//         super(props);
-//         this.state = {
-//             isComparisonMode: false,
-//             compareToUrl: null
-//         }
-//     }
-
-//     render() {
-//         return <div>
-//             {(!this.state.isComparisonMode || this.state.compareToUrl == null) && <img
-//                 style={{ border: '1px solid #021a40' }}
-//                 src={this.props.originalUrl}
-//                 alt='scene7' />}
-//             {this.state.isComparisonMode && (this.state.compareToUrl != null) && <ImageDiff 
-//                 before={this.props.originalUrl} 
-//                 after={this.state.compareToUrl} type="swipe" value={.5} 
-//             />}
-//             <Button variant="outlined" color="secondary" onClick={() => { this.setState(preveState => ({ isComparisonMode: !preveState.isComparisonMode })) }}>
-//                 Switch
-//             </Button>
-//             {this.state.isComparisonMode && <TextField value={this.state.compareToUrl}
-//                 onChange={e => {
-//                     this.setState({
-//                         compareToUrl: e.target.value
-//                     })
-//                 }}
-//                 label="Compare to url"
-//                 fullWidth
-//                 multiline/>}
-//         </div>
-//     }
-// }
 
 export default ImageComparator;
