@@ -13,9 +13,7 @@
     "react": "^16.4.1",
     "react-autosuggest": "^9.3.4",
     "react-color": "^2.14.1",
-    "react-compare-image": "^0.6.4",
     "react-dom": "^16.4.1",
-    "react-image-diff": "^0.1.0",
     "react-scripts": "1.1.4"
   },
   "scripts": {
